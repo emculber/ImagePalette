@@ -40,15 +40,24 @@ int main(int argc, char ** argv)
   uint8_t b;
 
   fprintf(stderr, "Width: %i, Height: %i", w, h);
-  for(int x=0; x<w; x++) {
-    for(int y=0; y<h; y++) {
+  SDL_LockSurface(new_image);
+   for(int y=0; y<h; y++) {
+    for(int x=0; x<w; x++) {
       int index = (y*w) + x;
       SDL_GetRGB(*(pixels) + index, new_image->format ,  &r, &g, &b);
+      b += 100;
+      if(b > 255) {
+        b=255;
+      }
+      fprintf(stderr, "Set Pixel\n");
+      pixels[index] = SDL_MapRGB(new_image->format, r, g, b);
       fprintf(stderr, "(%i,%i) Access Point: %i, Red: %i, Green: %i, Blue: %i\n",x, y, index, r, g, b);
     }
   }
+  SDL_UnlockSurface(new_image);
 
   SDL_Texture * texture = SDL_CreateTextureFromSurface(renderer, image);
+  SDL_Texture * texture2 = SDL_CreateTextureFromSurface(renderer, new_image);
 
   while (!quit)
   {
@@ -64,7 +73,7 @@ int main(int argc, char ** argv)
     //SDL_Rect dstrect = { 5, 5, 320, 240 };
     //SDL_RenderCopy(renderer, texture, NULL, &dstrect);
     SDL_RenderCopy(renderer, texture, NULL, &top_image);
-    SDL_RenderCopy(renderer, texture, NULL, &bottom_image);
+    SDL_RenderCopy(renderer, texture2, NULL, &bottom_image);
     SDL_RenderPresent(renderer);
   }
 
