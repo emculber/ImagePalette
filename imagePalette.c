@@ -1,8 +1,10 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <unistd.h>
 
 int main(int argc, char ** argv)
 {
+    int pollingDelay = 100;
   int quit = 0;
   SDL_Event event;
 
@@ -32,28 +34,38 @@ int main(int argc, char ** argv)
   //SDL_Surface * new_image = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
   SDL_Surface * new_image = IMG_Load("sample.jpg");
   Uint32 *pixels = (Uint32 *)new_image->pixels;
-  int w = image->w;
+  
   int h = image->h;
+  int w = image->w;
+  int w0 = image->pitch * image->format->BytesPerPixel;
 
   uint8_t r;
   uint8_t g;
   uint8_t b;
 
-  fprintf(stderr, "Width: %i, Height: %i", w, h);
+  fprintf(stderr, "Width: %i (%i), Height: %i\n", w, w0, h);
+
+    return 0;
   SDL_LockSurface(new_image);
    for(int y=0; y<h; y++) {
     for(int x=0; x<w; x++) {
       int index = (y*w) + x;
-      SDL_GetRGB(*(pixels) + index, new_image->format ,  &r, &g, &b);
-      b += 100;
-      if(b > 255) {
-        b=255;
-      }
-      fprintf(stderr, "Set Pixel\n");
-      pixels[index] = SDL_MapRGB(new_image->format, r, g, b);
+      SDL_GetRGB(pixels[index], new_image->format ,  &r, &g, &b);
+      //b += 100;
+      //if(b > 255) {
+      //  b=255;
+      //}
+      //fprintf(stderr, "Set Pixel\n");
+      pixels[index] = SDL_MapRGB(new_image->format, g, b, r);
       fprintf(stderr, "(%i,%i) Access Point: %i, Red: %i, Green: %i, Blue: %i\n",x, y, index, r, g, b);
+      //usleep(pollingDelay*100);
     }
+       if(y==800) {
+           break;
+       }
   }
+    
+    fprintf(stderr, "(%i,%i)\n",h, (h * w0));
   SDL_UnlockSurface(new_image);
 
   SDL_Texture * texture = SDL_CreateTextureFromSurface(renderer, image);
